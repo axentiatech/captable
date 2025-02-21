@@ -1,7 +1,7 @@
 import { logger } from "@/lib/logger";
 import type { Context } from "hono";
 import { HTTPException } from "hono/http-exception";
-import type { StatusCode } from "hono/utils/http-status";
+import type { ContentfulStatusCode, StatusCode } from "hono/utils/http-status";
 import type { ZodError } from "zod";
 
 import { z } from "@hono/zod-openapi";
@@ -192,7 +192,7 @@ export class ApiError extends HTTPException {
     code: z.infer<typeof ErrorCode>;
     message: string;
   }) {
-    super(codeToStatus(code), { message });
+    super(codeToStatus(code) as ContentfulStatusCode, { message });
     this.code = code;
   }
 }

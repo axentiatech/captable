@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DropdownButton } from "@/components/ui/dropdown-button";
 import { api } from "@/trpc/react";
-import type { Block, PartialBlock } from "@blocknote/core";
+import type { Block, BlockSchemaFromSpecs, PartialBlock } from "@blocknote/core";
 import type { Update } from "@prisma/client";
 import { RiArrowDownSLine } from "@remixicon/react";
 import Link from "next/link";
@@ -42,7 +42,7 @@ const UpdatesEditor = ({
   const date = new Date();
   const formattedDate = dayjsExt(date).format("MMM YYYY");
 
-  const defaultContent: Block[] = [
+  const defaultContent: PartialBlock[] = [
     {
       id: "1",
       type: "paragraph",
@@ -166,14 +166,14 @@ const UpdatesEditor = ({
   ];
 
   const [title, setTitle] = useState<string>(update?.title ?? "");
-  const [content, setContent] = useState<Block[]>(
-    (update?.content as Block[]) ?? defaultContent,
+  const [content, setContent] = useState<PartialBlock[]>(
+    (update?.content as PartialBlock[]) ?? defaultContent,
   );
+  
   const [html, setHtml] = useState<string>(update?.html ?? "");
   const [loading, setLoading] = useState<boolean>(false);
-
   const editor = useCreateBlockNote({
-    initialContent: content,
+    initialContent: content as any,
   });
 
   const draftMutation = api.update.save.useMutation({
