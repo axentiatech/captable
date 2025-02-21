@@ -1,4 +1,3 @@
-test
 
 <a href="https://captable.inc" alt="Captable, Inc.">
   <img alt="Captable, Inc. cover image" src="https://captable.inc/og.png">
