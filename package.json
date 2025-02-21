@@ -20,7 +20,6 @@
     "build": "next build",
     "start": "next start",
     "postinstall": "prisma generate",
-    "prepare": "husky",
     "lint": "biome check --apply ./src",
     "email:dev": "mailpit",
     "format": "biome format --write ./src && prisma format",
