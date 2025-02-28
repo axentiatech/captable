@@ -1,7 +1,12 @@
 import { Navbar } from "@/components/navbar";
 import { CompanyForm } from "@/components/onboarding/company-form";
 import { withServerSession } from "@/server/auth";
+import { type Metadata } from "next";
 import { redirect } from "next/navigation";
+
+export const metadata: Metadata = {
+  title: "Onboarding",
+};
 
 const OnboardingPage = async () => {
   const session = await withServerSession();
@@ -18,7 +23,7 @@ const OnboardingPage = async () => {
       <div className="border-rounded w-full max-w-2xl border bg-white p-10 shadow">
         <div className="mb-5">
           <h1 className="text-2xl font-semibold tracking-tight">
-            Welcome to OpenCap!
+            Welcome to Ingauge, Inc.!
           </h1>
           <p className="text-sm text-muted-foreground">
             You are almost there. Please complete the form below to continue

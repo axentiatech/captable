@@ -1,27 +1,29 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { type z } from "zod";
-import { Form, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { api } from "@/trpc/react";
-import React, { useRef } from "react";
-import { useToast } from "@/components/ui/use-toast";
-import { useSession } from "next-auth/react";
 import { uploadFile } from "@/common/uploads";
-import { useRouter } from "next/navigation";
+import Loading from "@/components/common/loading";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Form, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import { PayloadType } from "@/lib/constants";
+import { type RootPayload } from "@/lib/types";
 import {
   compareFormDataWithInitial,
   isFileExists,
   validateFile,
 } from "@/lib/utils";
 import { profileSettingsSchema } from "@/lib/zodSchemas";
-import { PayloadType } from "@/lib/constants";
-import { type RootPayload } from "@/lib/types";
+import { api } from "@/trpc/react";
 import { type RouterOutputs } from "@/trpc/shared";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import React, { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { type z } from "zod";
 
 type MemberProfile = RouterOutputs["member"]["getProfile"];
 
@@ -30,6 +32,7 @@ type ProfileType = {
 };
 
 export const ProfileSettings = ({ memberProfile }: ProfileType) => {
+  const [loading, setLoading] = useState<boolean>(false);
   const { data: session, update } = useSession();
   const router = useRouter();
   const { toast } = useToast();
@@ -101,7 +104,7 @@ export const ProfileSettings = ({ memberProfile }: ProfileType) => {
 
       toast({
         variant: "default",
-        title: "Profile changed successfully.",
+        title: "🎉 Successfully updated your profile",
       });
     },
     onError: () => {
@@ -120,9 +123,9 @@ export const ProfileSettings = ({ memberProfile }: ProfileType) => {
         keyPrefix: "profile-avatars",
         identifier: session.user.id,
       };
-      const { bucketUrl } = await uploadFile(file, options, "publicBucket");
+      const { fileUrl } = await uploadFile(file, options, "publicBucket");
 
-      return { imageUrl: bucketUrl };
+      return { imageUrl: fileUrl };
     }
 
     return { imageUrl: "" };
@@ -139,6 +142,7 @@ export const ProfileSettings = ({ memberProfile }: ProfileType) => {
 
     if (isValid) {
       try {
+        setLoading(true);
         const { imageUrl } = await handleImageUpload(file);
 
         if (!imageUrl) {
@@ -162,6 +166,8 @@ export const ProfileSettings = ({ memberProfile }: ProfileType) => {
           title: "Failed uploading image.",
           description: "Please try again later.",
         });
+      } finally {
+        setLoading(false);
       }
     } else {
       toast({
@@ -189,6 +195,7 @@ export const ProfileSettings = ({ memberProfile }: ProfileType) => {
     const { fullName, jobTitle, loginEmail, workEmail } = values;
 
     try {
+      setLoading(true);
       saveProfileMutation.mutate({
         type: PayloadType.PROFILE_DATA,
         payload: {
@@ -205,6 +212,8 @@ export const ProfileSettings = ({ memberProfile }: ProfileType) => {
         title: "Failed updating profile.",
         description: "Please try again later.",
       });
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -213,13 +222,12 @@ export const ProfileSettings = ({ memberProfile }: ProfileType) => {
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-6">
           <div className="col-span-full flex items-center gap-x-8">
-            <img
-              src={session?.user.image ?? "/avatar.svg"}
-              alt="User avatar"
-              width={50}
-              height={50}
-              className="h-20 w-20 flex-none rounded-full object-cover"
-            />
+            <Avatar className="h-20 w-20 rounded-full">
+              <AvatarImage
+                src={session?.user?.image || "/placeholders/user.svg"}
+              />
+            </Avatar>
+
             <div className="flex items-start space-x-3">
               <div>
                 <Button
@@ -295,6 +303,8 @@ export const ProfileSettings = ({ memberProfile }: ProfileType) => {
           </Button>
         </div>
       </form>
+
+      {loading && <Loading />}
     </Form>
   );
 };

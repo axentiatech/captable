@@ -1,26 +1,30 @@
 "use client";
 
 import {
-  RiHome2Line,
-  RiHome2Fill,
-  RiPieChartLine,
-  RiPieChartFill,
-  RiSafeLine,
-  RiSafeFill,
-  RiFolder5Line,
-  RiFolder5Fill,
-  RiFolderChartLine,
-  RiFolderChartFill,
-  RiListIndefinite,
-  RiListCheck3,
-  RiGroup2Line,
-  RiGroup2Fill,
-  RiFolderChart2Line,
-  RiFolderChart2Fill,
-  RiFileTextLine,
-  RiFileTextFill,
-  RiEqualizer2Line,
   RiEqualizer2Fill,
+  RiEqualizer2Line,
+  RiFileTextFill,
+  RiFileTextLine,
+  RiFolder5Fill,
+  RiFolder5Line,
+  RiFolderChart2Fill,
+  RiFolderChart2Line,
+  RiFolderChartFill,
+  RiFolderChartLine,
+  RiGroup2Fill,
+  RiGroup2Line,
+  // RiHome2Fill,
+  // RiHome2Line,
+  RiListCheck3,
+  RiListIndefinite,
+  RiMailSendFill,
+  RiMailSendLine,
+  RiMoneyDollarCircleFill,
+  RiMoneyDollarCircleLine,
+  RiPieChartFill,
+  RiPieChartLine,
+  RiSafeFill,
+  RiSafeLine,
 } from "@remixicon/react";
 
 import {
@@ -30,26 +34,26 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+import { CaptableLogo } from "@/components/common/logo";
 import { usePathname } from "next/navigation";
-import { OpenCapLogo } from "@/components/shared/logo";
 
-import { NavLink } from "./nav-link";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { NavLink } from "./nav-link";
 
 import { type TGetCompanyList } from "@/server/company";
 import { CompanySwitcher } from "./company-switcher";
 
 const navigation = [
-  {
-    name: "Overview",
-    href: "/",
-    icon: RiHome2Line,
-    activeIcon: RiHome2Fill,
-  },
+  // {
+  //   name: "Overview",
+  //   href: "/",
+  //   icon: RiHome2Line,
+  //   activeIcon: RiHome2Fill,
+  // },
   {
     name: "Cap table",
-    href: "/captable",
+    href: "/",
     icon: RiPieChartLine,
     activeIcon: RiPieChartFill,
   },
@@ -78,35 +82,81 @@ const navigation = [
     activeIcon: RiSafeFill,
     subNav: [
       {
-        name: "Equity",
-        href: "/equity",
+        name: "Shares",
+        href: "/shares",
       },
       {
-        name: "Options",
+        name: "Stock options",
         href: "/options",
       },
+      {
+        name: "Transactions",
+        href: "/transactions",
+      },
+    ],
+  },
+  {
+    name: "Fundraise",
+    href: "/fundraise",
+    icon: RiMoneyDollarCircleLine,
+    activeIcon: RiMoneyDollarCircleFill,
+    subNav: [
       {
         name: "SAFEs",
         href: "/safes",
       },
+
       {
         name: "Convertible notes",
         href: "/convertible-notes",
       },
+
+      {
+        name: "Investments",
+        href: "/investments",
+      },
     ],
   },
+
   {
     name: "Documents",
     href: "/documents",
     icon: RiFolder5Line,
     activeIcon: RiFolder5Fill,
+    subNav: [
+      {
+        name: "Storage",
+        href: "/",
+      },
+      {
+        name: "Data rooms",
+        href: "/data-rooms",
+      },
+      {
+        name: "eSign documents",
+        href: "/esign",
+      },
+      {
+        name: "Share documents",
+        href: "/share",
+      },
+    ],
   },
+
+  {
+    name: "Updates",
+    href: "/updates",
+    icon: RiMailSendLine,
+    activeIcon: RiMailSendFill,
+  },
+
   {
     name: "Reports",
     href: "/reports",
     icon: RiFolderChartLine,
     activeIcon: RiFolderChartFill,
   },
+
   {
     name: "Audits",
     href: "/audits",
@@ -118,21 +168,29 @@ const navigation = [
 const company = [
   {
     id: 1,
+    name: "Team",
+    rootPath: "/settings/team",
+    href: "/settings/team",
+    icon: RiGroup2Line,
+    activeIcon: RiGroup2Fill,
+  },
+  {
+    id: 2,
     name: "Settings",
-    rootPath: "/settings/",
+    rootPath: "/settings/company",
     href: "/settings/company",
     icon: RiEqualizer2Line,
     activeIcon: RiEqualizer2Fill,
   },
   {
-    id: 2,
+    id: 3,
     name: "Form 3921",
     href: "/3921",
     icon: RiFileTextLine,
     activeIcon: RiFileTextFill,
   },
   {
-    id: 3,
+    id: 4,
     name: "409A Valuation",
     href: "/409a",
     icon: RiFileTextLine,
@@ -156,7 +214,7 @@ export function SideBar({ className, publicId, companies }: SideBarProps) {
       <div className={cn("pb-12", className)}>
         <div className="fixed gap-y-4 py-4">
           <div className="flex items-center px-1 py-2">
-            <OpenCapLogo className="h-7 w-auto" />
+            <CaptableLogo className="h-7 w-auto" />
 
             <CompanySwitcher companies={companies} publicId={publicId} />
           </div>
@@ -174,15 +232,12 @@ export function SideBar({ className, publicId, companies }: SideBarProps) {
                   <li key={item.name}>
                     {item.subNav ? (
                       <Accordion type="single" collapsible>
-                        <AccordionItem
-                          value="item-1"
-                          className="-my-1 border-none"
-                        >
+                        <AccordionItem value="item-1" className="border-none">
                           <div className="flex">
                             {isActive ? (
                               <item.activeIcon
                                 className={cn(
-                                  "ml-1 mr-1 mt-2 inline-block",
+                                  "ml-1 mr-1 mt-1 inline-block",
                                   "text-primary",
                                   "h-6 w-6 shrink-0",
                                 )}
@@ -191,7 +246,7 @@ export function SideBar({ className, publicId, companies }: SideBarProps) {
                             ) : (
                               <item.icon
                                 className={cn(
-                                  "ml-1 mr-1 mt-2 inline-block",
+                                  "ml-1 mr-1 mt-1 inline-block",
                                   "text-gray-400 group-hover:text-primary",
                                   "h-6 w-6 shrink-0",
                                 )}
@@ -204,7 +259,7 @@ export function SideBar({ className, publicId, companies }: SideBarProps) {
                                 isActive
                                   ? "bg-gray-50 font-semibold text-primary"
                                   : "text-gray-700 hover:bg-gray-50 hover:text-primary",
-                                "group flex gap-x-3 rounded-md p-2 text-sm leading-6 hover:no-underline",
+                                "group flex gap-x-3 rounded-md px-2 py-1 text-sm leading-6 hover:no-underline",
                               )}
                             >
                               {item.name}
@@ -216,9 +271,12 @@ export function SideBar({ className, publicId, companies }: SideBarProps) {
                               {item.subNav.map((subItem) => {
                                 const href =
                                   basePath + item.href + subItem.href;
-                                const isActive = currentPath.includes(
-                                  item.href + subItem.href,
-                                );
+                                const isActive =
+                                  (subItem.href != "/" &&
+                                    currentPath.includes(
+                                      item.href + subItem.href,
+                                    )) ||
+                                  href === `${currentPath}/`;
 
                                 return (
                                   <li key={subItem.name}>

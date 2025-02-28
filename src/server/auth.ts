@@ -1,21 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { render } from "jsx-email";
+import bcrypt from "bcryptjs";
 import {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
+  type Session,
 } from "next-auth";
 
-import EmailProvider from "next-auth/providers/email";
+import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
-import { db } from "@/server/db";
 import { env } from "@/env";
-import { sendMail } from "./mailer";
-import MagicLinkEmail from "@/emails/MagicLinkEmail";
-import { type MemberStatusEnum } from "@/prisma-enums";
+import { type MemberStatusEnum } from "@/prisma/enums";
+
+import { db, type PrismaTransactionalClient, type TPrisma } from "@/server/db";
+
+import { getUserByEmail, getUserById } from "./user";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
@@ -56,7 +58,23 @@ declare module "next-auth/jwt" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
+  events: {
+    async linkAccount({ user }) {
+      await db.user.update({
+        where: { id: user.id },
+        data: { emailVerified: new Date() },
+      });
+    },
+  },
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider !== "credentials") return true;
+
+      const existingUser = await getUserById(user.id);
+      if (!existingUser?.emailVerified) return false;
+
+      return true;
+    },
     session({ session, token }) {
       session.user.isOnboarded = token.isOnboarded;
       session.user.companyId = token.companyId;
@@ -73,17 +91,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
 
-    async jwt({ token, trigger, session }) {
-      if (trigger === "update") {
-        const newToken = {
-          ...token,
-          ...session?.user,
-          picture: session?.user?.image || "",
-        };
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return newToken;
-      }
-
+    async jwt({ token, trigger }) {
       if (trigger) {
         const member = await db.member.findFirst({
           where: {
@@ -102,6 +110,7 @@ export const authOptions: NextAuthOptions = {
             user: {
               select: {
                 name: true,
+                image: true,
               },
             },
             company: {
@@ -119,6 +128,7 @@ export const authOptions: NextAuthOptions = {
           token.companyId = member.companyId;
           token.isOnboarded = member.isOnboarded;
           token.companyPublicId = member.company.publicId;
+          token.picture = member.user?.image;
         } else {
           token.status = "";
           token.companyId = "";
@@ -137,23 +147,26 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   providers: [
-    EmailProvider({
-      sendVerificationRequest: async ({ identifier, url }) => {
-        if (env.NODE_ENV === "development") {
-          console.log(`🔑 Login link: ${url}`);
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (credentials) {
+          const { email, password } = credentials;
+
+          const user = await getUserByEmail(email);
+          // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+          if (!user || !user.password) return null;
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          const passwordsMatch = await bcrypt.compare(password, user.password);
+
+          if (passwordsMatch) return user;
         }
-
-        const html = await render(
-          MagicLinkEmail({
-            magicLink: url,
-          }),
-        );
-
-        await sendMail({
-          to: identifier,
-          subject: "Your OpenCap Login Link",
-          html,
-        });
+        return null;
       },
     }),
     /**
@@ -193,3 +206,24 @@ export const withServerSession = async () => {
 
   return session;
 };
+
+interface checkMembershipOptions {
+  session: Session;
+  tx: PrismaTransactionalClient | TPrisma;
+}
+
+export async function checkMembership({ session, tx }: checkMembershipOptions) {
+  const { companyId, id: memberId } = await tx.member.findFirstOrThrow({
+    where: {
+      id: session.user.memberId,
+      companyId: session.user.companyId,
+      isOnboarded: true,
+    },
+    select: {
+      id: true,
+      companyId: true,
+    },
+  });
+
+  return { companyId, memberId };
+}

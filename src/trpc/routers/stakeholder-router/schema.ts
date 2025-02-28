@@ -1,7 +1,7 @@
 import {
   StakeholderRelationshipEnum,
   StakeholderTypeEnum,
-} from "@/prisma-enums";
+} from "@/prisma/enums";
 import { z } from "zod";
 
 export const ZodAddStakeholderMutationSchema = z.object({
@@ -28,4 +28,8 @@ export const ZodAddStakeholderArrayMutationSchema = z.array(
 
 export type TypeStakeholderArray = z.infer<
   typeof ZodAddStakeholderArrayMutationSchema
+>;
+
+export type AddStakeholderMutationType = z.infer<
+  typeof ZodAddStakeholderMutationSchema
 >;

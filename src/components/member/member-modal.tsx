@@ -1,15 +1,15 @@
 "use client";
 
-import Modal from "@/components/shared/modal";
+import Modal from "@/components/common/modal";
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 
 import { Input } from "@/components/ui/input";
@@ -178,7 +178,9 @@ const MemberModal = ({
 
           <Button
             loading={isSubmitting}
-            loadingText="Sending invite..."
+            loadingText={
+              rest.isEditMode === true ? "Updating..." : "Sending invite..."
+            }
             className="mt-5"
           >
             {rest.isEditMode === true ? "Update team member" : "Send an invite"}

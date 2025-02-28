@@ -19,7 +19,7 @@ const config = {
     extend: {
       fontFamily: {
         mono: ["var(--font-roboto-mono)", "monospace"],
-        sans: ["var(--font-instrument-sans)", "system-ui", "sans-serif"],
+        sans: ["var(--font-satoshi)", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -78,10 +78,15 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "caret-blink": {
+          "0%,70%,100%": { opacity: "1" },
+          "20%,50%": { opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "caret-blink": "caret-blink 1.25s ease-out infinite",
       },
     },
   },
@@ -117,7 +122,7 @@ const config = {
     },
   ],
 
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 } satisfies Config;
 
 export default config;

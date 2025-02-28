@@ -1,5 +1,10 @@
 import { Navbar } from "@/components/navbar";
 import { CompanyForm } from "@/components/onboarding/company-form";
+import { type Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "New",
+};
 
 const OnboardingPage = async () => {
   return (
@@ -9,7 +14,7 @@ const OnboardingPage = async () => {
       <div className="border-rounded w-full max-w-2xl border bg-white p-10 shadow">
         <div className="mb-5">
           <h1 className="text-2xl font-semibold tracking-tight">
-            Welcome to OpenCap!
+            Welcome to Ingauge, Inc.!
           </h1>
           <p className="text-sm text-muted-foreground">
             You are almost there. Please complete the form below to continue

@@ -1,8 +1,8 @@
 import {
+  getPresignedGetUrl,
   getPresignedPutUrl,
   type getPresignedUrlOptions,
 } from "@/server/file-uploads";
-
 /**
  * usage
  * ```js
@@ -46,13 +46,39 @@ export const uploadFile = async (
   }
 
   const { name, type, size } = file;
+  let fileUrl = bucketUrl;
+
+  if (bucketMode === "publicBucket" && process.env.NEXT_PUBLIC_UPLOAD_DOMAIN) {
+    fileUrl = `${process.env.NEXT_PUBLIC_UPLOAD_DOMAIN}/${key}`;
+  }
+
   return {
     key,
     name,
     mimeType: type,
     size,
-    bucketUrl,
+    fileUrl,
   };
 };
 
 export type TUploadFile = Awaited<ReturnType<typeof uploadFile>>;
+
+export const getFileFromS3 = async (key: string) => {
+  const { url } = await getPresignedGetUrl(key);
+
+  const response = await fetch(url, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to get file "${key}", failed with status code ${response.status}`,
+    );
+  }
+
+  const buffer = await response.arrayBuffer();
+
+  const binaryData = new Uint8Array(buffer);
+
+  return binaryData;
+};

@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,8 +12,8 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { signOut } from "next-auth/react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 
 type UserDropdownProps = {
   companyPublicId: string;
@@ -30,9 +29,8 @@ export function UserDropdown({ companyPublicId }: UserDropdownProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-9 w-9">
-            <AvatarImage src={image ?? "/avatar.svg"} alt="avatar" />
-            <AvatarFallback>SC</AvatarFallback>
+          <Avatar className="h-9 w-9 rounded-full">
+            <AvatarImage src={image || "/placeholders/user.svg"} />
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -72,7 +70,7 @@ export function UserDropdown({ companyPublicId }: UserDropdownProps) {
             await signOut();
           }}
         >
-          Log Out
+          Sign out
           <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>

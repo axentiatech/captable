@@ -1,8 +1,9 @@
 import { z } from "zod";
 
-import { FieldTypes } from "@/prisma-enums";
+import { FieldTypes, TemplateStatus } from "@/prisma/enums";
 
 export const ZodAddFieldMutationSchema = z.object({
+  status: z.nativeEnum(TemplateStatus),
   templatePublicId: z.string(),
   data: z.array(
     z.object({
@@ -13,8 +14,13 @@ export const ZodAddFieldMutationSchema = z.object({
       top: z.number(),
       left: z.number(),
       required: z.boolean(),
-      placeholder: z.string(),
       type: z.nativeEnum(FieldTypes),
+      viewportHeight: z.number(),
+      viewportWidth: z.number(),
+      page: z.number(),
+      defaultValue: z.string(),
+      readOnly: z.boolean(),
+      recipientId: z.string(),
     }),
   ),
 });

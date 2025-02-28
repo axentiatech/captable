@@ -1,14 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
-import Link from "next/link";
-import { RiUploadLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
-import { parseCSV } from "@/lib/csv-parser";
 import { toast } from "@/components/ui/use-toast";
+import { parseStrakeholdersCSV } from "@/lib/stakeholders-csv-parser";
 import { api } from "@/trpc/react";
 import { type TypeStakeholderArray } from "@/trpc/routers/stakeholder-router/schema";
+import { RiUploadLine } from "@remixicon/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
 
 type StakeholderUploaderType = {
   setOpen: (val: boolean) => void;
@@ -46,7 +46,7 @@ const StakeholderUploader = ({ setOpen }: StakeholderUploaderType) => {
         return;
       }
 
-      const parsedData = await parseCSV(csvFile[0]);
+      const parsedData = await parseStrakeholdersCSV(csvFile[0]);
       await mutateAsync(parsedData as TypeStakeholderArray);
 
       setOpen(false);
@@ -67,7 +67,7 @@ const StakeholderUploader = ({ setOpen }: StakeholderUploaderType) => {
         Please download the{" "}
         <Link
           download
-          href="/sample-csv/opencap-stakeholders-template.csv"
+          href="/sample/csv/captable-stakeholders-template.csv"
           target="_blank"
           rel="noopener noreferrer"
           className="rounded bg-gray-300/70 px-2 py-1 text-xs font-medium hover:bg-gray-400/50"

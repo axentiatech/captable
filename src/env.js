@@ -29,7 +29,7 @@ export const env = createEnv({
       ),
     NODE_ENV: z
       .enum(["development", "test", "production"])
-      .default("development"),
+      .default("production"),
     NEXTAUTH_SECRET: z.string(),
     NEXTAUTH_URL: z.preprocess(
       // This makes Vercel deployments not fail if you don't set NEXTAUTH_URL
@@ -55,8 +55,8 @@ export const env = createEnv({
 
     UPLOAD_ENDPOINT: z.string(),
     UPLOAD_REGION: z.string(),
-    UPLOAD_BUCKET: z.string(),
-    PUBLIC_UPLOAD_BUCKET: z.string(),
+    UPLOAD_BUCKET_PUBLIC: z.string(),
+    UPLOAD_BUCKET_PRIVATE: z.string(),
     UPLOAD_ACCESS_KEY_ID: z.string().optional(),
     UPLOAD_SECRET_ACCESS_KEY: z.string().optional(),
     UPLOAD_PROVIDER: z.enum(["s3", "r2"]),
@@ -64,6 +64,11 @@ export const env = createEnv({
     // google
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),
+
+    // trigger.dev
+    TRIGGER_API_ID: z.string(),
+    TRIGGER_API_KEY: z.string().optional(),
+    TRIGGER_API_URL: z.string().optional(),
   },
 
   /**
@@ -74,6 +79,8 @@ export const env = createEnv({
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_NODE_ENV: z.string().default("development"),
+    NEXT_PUBLIC_UPLOAD_DOMAIN: z.string().optional(),
+    NEXT_PUBLIC_TRIGGER_PUBLIC_API_KEY: z.string().optional(),
   },
 
   /**
@@ -97,14 +104,21 @@ export const env = createEnv({
 
     UPLOAD_ENDPOINT: process.env.UPLOAD_ENDPOINT,
     UPLOAD_REGION: process.env.UPLOAD_REGION,
-    UPLOAD_BUCKET: process.env.UPLOAD_BUCKET,
-    PUBLIC_UPLOAD_BUCKET: process.env.PUBLIC_UPLOAD_BUCKET,
+    UPLOAD_BUCKET_PUBLIC: process.env.UPLOAD_BUCKET_PUBLIC,
+    UPLOAD_BUCKET_PRIVATE: process.env.UPLOAD_BUCKET_PRIVATE,
     UPLOAD_ACCESS_KEY_ID: process.env.UPLOAD_ACCESS_KEY_ID,
     UPLOAD_SECRET_ACCESS_KEY: process.env.UPLOAD_SECRET_ACCESS_KEY,
     UPLOAD_PROVIDER: process.env.UPLOAD_PROVIDER,
+    NEXT_PUBLIC_UPLOAD_DOMAIN: process.env.NEXT_PUBLIC_UPLOAD_DOMAIN,
 
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+
+    TRIGGER_API_ID: process.env.TRIGGER_API_ID,
+    TRIGGER_API_KEY: process.env.TRIGGER_API_KEY,
+    TRIGGER_API_URL: process.env.TRIGGER_API_URL,
+    NEXT_PUBLIC_TRIGGER_PUBLIC_API_KEY:
+      process.env.NEXT_PUBLIC_TRIGGER_PUBLIC_API_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

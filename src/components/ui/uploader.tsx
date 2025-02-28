@@ -1,15 +1,15 @@
 "use client";
 
-import { Button } from "./button";
-import { api } from "@/trpc/react";
 import { uploadFile } from "@/common/uploads";
-import React, { useState, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { api } from "@/trpc/react";
+import React, { useCallback, useState } from "react";
 import {
   useDropzone,
-  type FileWithPath,
   type DropzoneOptions,
+  type FileWithPath,
 } from "react-dropzone";
+import { Button } from "./button";
 
 import { type RouterOutputs } from "@/trpc/shared";
 
@@ -20,6 +20,16 @@ type DocumentUploadDropzone = Omit<
   "noClick" | "noKeyboard" | "onDrop"
 >;
 
+type UploadProps =
+  | {
+      shouldUpload?: true;
+      onSuccess?: (data: UploadReturn) => void | Promise<void>;
+    }
+  | {
+      shouldUpload: false;
+      onSuccess?: (data: FileWithPath[]) => void | Promise<void>;
+    };
+
 type Props = {
   header?: React.ReactNode;
 
@@ -28,14 +38,17 @@ type Props = {
 
   keyPrefix: string;
 
-  onSuccess?: (data: UploadReturn) => void | Promise<void>;
-} & DocumentUploadDropzone;
+  multiple?: boolean;
+} & DocumentUploadDropzone &
+  UploadProps;
 
 export function Uploader({
   header,
   identifier,
   keyPrefix,
   onSuccess,
+  multiple = false,
+  shouldUpload = true,
   ...rest
 }: Props) {
   const { toast } = useToast();
@@ -44,19 +57,42 @@ export function Uploader({
 
   const onDrop = useCallback(async (acceptedFiles: FileWithPath[]) => {
     try {
-      setUploading(true);
-      for (const file of acceptedFiles) {
-        const { key, mimeType, name, size } = await uploadFile(file, {
-          identifier,
-          keyPrefix,
+      if (!multiple && acceptedFiles.length > 1) {
+        toast({
+          variant: "destructive",
+          title: "Files exceeded",
+          description: "Only one file is allowed for upload",
         });
+        return;
+      }
 
-        const data = await mutateAsync({ key, mimeType, name, size });
+      setUploading(true);
 
-        if (onSuccess) {
-          await onSuccess(data);
+      if (shouldUpload) {
+        for (const file of acceptedFiles) {
+          const { key, mimeType, name, size } = await uploadFile(file, {
+            identifier,
+            keyPrefix,
+          });
+
+          const data = await mutateAsync({ key, mimeType, name, size });
+
+          if (onSuccess) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+            await onSuccess(data as any);
+          }
+
+          toast({
+            variant: "default",
+            title: "🎉 Successfully uploaded",
+            description: "Your document(s) has been uploaded.",
+          });
         }
-
+      } else {
+        if (onSuccess) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+          await onSuccess(acceptedFiles as any);
+        }
         toast({
           variant: "default",
           title: "🎉 Successfully uploaded",
@@ -92,7 +128,7 @@ export function Uploader({
         className="flex w-full flex-col items-center justify-center  rounded-md border border-dashed border-border px-5 py-10"
       >
         {header}
-        <input {...getInputProps()} multiple={false} />
+        <input {...getInputProps()} multiple={multiple} />
         <p className="text-center text-neutral-500">
           Drop & drop, or select a file to upload
         </p>
